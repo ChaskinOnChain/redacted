@@ -60,8 +60,8 @@ function RegisterForm({ toggle }: Props) {
             <FormField name="email" type="email" placeholder="Email" />
             <FormField name="password" type="password" placeholder="Password" />
             <button
-              type="submit"
-              className="w-full mt-3 bg-sky-500 text-white text-xl p-3 rounded hover:bg-sky-400 transition duration-500"
+              onClick={() => handleSubmit()}
+              className="w-full mt-3 text-white bg-sky-400 text-xl p-3 rounded hover:bg-sky-500 transition duration-500"
             >
               REGISTER
             </button>

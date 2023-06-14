@@ -19,7 +19,7 @@ const BottomForm = ({ toggle, isLogin }: Props) => {
           <>
             Don&apos;t have an account?{" "}
             <span
-              className="text-sky-500 font-bold cursor-pointer"
+              className="text-sky-400 font-bold cursor-pointer"
               onClick={toggle}
             >
               Sign up
@@ -29,7 +29,7 @@ const BottomForm = ({ toggle, isLogin }: Props) => {
           <>
             Already have an account?{" "}
             <span
-              className="text-sky-500 font-bold cursor-pointer"
+              className="text-sky-400 font-bold cursor-pointer"
               onClick={toggle}
             >
               Login here

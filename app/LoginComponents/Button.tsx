@@ -18,7 +18,7 @@ function Button({ name }: Props) {
   return (
     <button
       onClick={() => signIn(name.toLocaleLowerCase())}
-      className="border-2 py-1 rounded shadow-md"
+      className="border-2 py-3 rounded shadow-md"
     >
       <FontAwesomeIcon className="mr-1" icon={icon} /> Sign In with {name}
     </button>

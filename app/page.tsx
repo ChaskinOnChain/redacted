@@ -8,7 +8,7 @@ export default function Home() {
       <div className="w-1/2 flex flex-col gap-4 justify-center items-center">
         <div className="px-12 text-4xl font-bold text-center">
           Connect, share, and explore on{" "}
-          <span className="text-sky-500">Redacted</span> - where your story
+          <span className="text-sky-400">Redacted</span> - where your story
           unfolds
         </div>
         <div className="w-[30rem] h-[30rem] relative mx-auto">

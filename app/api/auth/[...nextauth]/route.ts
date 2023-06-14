@@ -5,7 +5,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import connectDb from "@/utils/connectDb";
 import bcrypt from "bcryptjs";
 import User from "@/models/User";
-import { signIn } from "next-auth/react";
 
 const authOptions: NextAuthOptions = NextAuth({
   providers: [
