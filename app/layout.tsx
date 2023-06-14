@@ -2,6 +2,7 @@ import { ThemeProvider } from "@/app/ThemeContext/ThemeContext";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import AuthProvider from "./components/AuthProvider/AuthProvider";
+import { QueryProvider } from "./ReactQuery/ReactQuery";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className}`}>
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,6 +1,5 @@
 "use client";
 
-// You need to import our styles for the button to look right. Best to import in the root /layout.tsx but this is fine
 import "@uploadthing/react/styles.css";
 import { UploadButton } from "@uploadthing/react";
 import { OurFileRouter } from "../api/uploadthing/core";
@@ -13,7 +12,6 @@ export default function ImageUploadButton() {
 
   return (
     <main className="flex flex-col items-center justify-between mt-3">
-      Upload Profile Picture
       <UploadButton<OurFileRouter>
         endpoint="imageUploader"
         onClientUploadComplete={(res) => {
@@ -30,7 +28,7 @@ export default function ImageUploadButton() {
           alert(`ERROR! ${error.message}`);
         }}
       />
-      {success && <p>Profile Picture Successfully Uploaded</p>}
+      {success && <p>Upload Successful</p>}
     </main>
   );
 }

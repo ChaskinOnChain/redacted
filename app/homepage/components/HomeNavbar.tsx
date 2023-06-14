@@ -18,7 +18,7 @@ function HomeNavbar() {
         <span className="font-bold text-xl text-sky-400">Redacted</span>
         <div>
           <input
-            className="bg-slate-300 rounded px-4 py-1 text-base"
+            className="bg-slate-200 rounded px-4 py-1 text-base"
             type="text"
             placeholder="Search..."
           />

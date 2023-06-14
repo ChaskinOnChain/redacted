@@ -1,40 +1,41 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import { getUserByEmail } from "@/utils/api/apiUtils";
 
 function Logout() {
   const [logout, setLogout] = useState(false);
-  const [name, setName] = useState("");
-  const session = useSession();
-  console.log(session);
+  const { data: session } = useSession();
+  const email = session?.user?.email;
 
-  useEffect(() => {
-    async function getUser() {
-      const res = await axios.get(
-        `http://localhost:3000/api/users/${session.data?.user?.email}`
-      );
-      const data = res.data;
-      console.log(data);
-      setName(data.firstName + " " + data.lastName);
-    }
-    getUser();
-  }, [session]);
+  const userQuery = useQuery({
+    queryKey: ["user", email],
+    queryFn: () => email && getUserByEmail(email),
+    enabled: !!email,
+  });
+
   return (
     <>
       <div
         onClick={() => setLogout((prev) => !prev)}
-        className="bg-slate-300 p-2 rounded flex justify-between items-center gap-2 cursor-pointer relative"
+        className=" p-2 border-4 shadow-sm rounded flex justify-between items-center gap-2 cursor-pointer relative"
       >
-        {name && <p>{name}</p>}
+        {userQuery.isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <p>{userQuery.data.firstName + " " + userQuery.data.lastName}</p>
+        )}
         <FontAwesomeIcon icon={faCaretDown} />
       </div>
-      {logout && name && (
-        <div className="absolute top-9 left-44 bg-slate-100 shadow-md rounded-md py-2">
-          <div className="p-2 hover:bg-sky-100 cursor-pointer">{name}</div>
+      {logout && userQuery.data && (
+        <div className="absolute top-9 left-44 bg-slate-400 shadow-md rounded-md py-2">
+          <div className="p-2 hover:bg-sky-100 cursor-pointer">
+            {userQuery.data.firstName + " " + userQuery.data.lastName}
+          </div>
           <div
             onClick={() => signOut()}
             className="p-2 hover:bg-sky-100 cursor-pointer"

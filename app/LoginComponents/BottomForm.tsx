@@ -39,6 +39,7 @@ const BottomForm = ({ toggle, isLogin }: Props) => {
       </p>
       <div className="flex flex-col gap-2 font-bold mt-8">
         <Button name="Google" />
+        <Button name="Facebook" />
       </div>
     </div>
   );

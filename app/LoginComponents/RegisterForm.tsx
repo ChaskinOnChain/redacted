@@ -56,6 +56,7 @@ function RegisterForm({ toggle }: Props) {
             <FormField name="lastName" type="text" placeholder="Last Name" />
             <FormField name="location" type="text" placeholder="Location" />
             <FormField name="occupation" type="text" placeholder="Occupation" />
+            Upload Profile Picture
             <ImageUploadButton />
             <FormField name="email" type="email" placeholder="Email" />
             <FormField name="password" type="password" placeholder="Password" />
