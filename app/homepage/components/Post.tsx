@@ -1,24 +1,122 @@
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
-import { getUserById } from "@/utils/api/apiUtils";
+import { faUserPlus, faHeart } from "@fortawesome/free-solid-svg-icons";
+import { getUserByEmail, getUserById } from "@/utils/api/apiUtils";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { Formik, Form, Field } from "formik";
+import * as yup from "yup";
 
 type Props = {
   authorId: string;
   text: string;
   picture: string;
+  comments: [{ text: string; email: string }];
+  likes: [string];
+  id: string;
 };
 
-const Post = ({ authorId, text, picture }: Props) => {
+type CommentData = {
+  text: string;
+  email: string;
+};
+
+const schema = yup.object().shape({
+  text: yup.string().required("required"),
+  commenterEmail: yup.string().required("required"),
+});
+
+const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
+  const [likeRequestInProgress, setLikeRequestInProgress] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const session = useSession();
+  const email = session.data?.user?.email;
+
+  const initialValues = {
+    text: "",
+    commenterEmail: email,
+  };
+
+  const { data: commentUsers, isLoading: isLoadingCommentUsers } = useQuery(
+    ["commentUsers", comments],
+    async () => {
+      const userPromises = comments.map((comment: CommentData) =>
+        getUserByEmail(comment.email)
+      );
+      return Promise.all(userPromises);
+    },
+    {
+      enabled: comments.length > 0,
+    }
+  );
+  const { data: returnedUser } = useQuery({
+    queryKey: ["LoggedInUser", email],
+    queryFn: () => email && getUserByEmail(email),
+    enabled: !!email,
+  });
+
   const { isLoading, isError, data } = useQuery({
     queryKey: ["user", authorId],
     queryFn: () => authorId && getUserById(authorId),
     enabled: !!authorId,
   });
+
+  const [likesCount, setLikesCount] = useState(likes.length);
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    if (returnedUser) {
+      if (likes.includes(returnedUser._id)) {
+        setLiked(true);
+        if (likesCount === 0) {
+          setLikesCount(1);
+        }
+      } else {
+        setLiked(false);
+      }
+    }
+  }, [returnedUser, likes]);
+
+  async function addLike() {
+    setLikeRequestInProgress(true);
+    try {
+      await axios.post(`api/posts/${id}/likes`, {
+        liked,
+        authorId: returnedUser._id,
+      });
+      setLiked((prev) => {
+        if (prev) {
+          setLikesCount((count) => count - 1);
+        } else {
+          setLikesCount((count) => count + 1);
+        }
+        return !prev;
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLikeRequestInProgress(false);
+    }
+  }
+
+  const handleSubmit = async (values, onSubmitProps) => {
+    try {
+      const res = await axios.post(`/api/posts/${id}/comments`, values);
+      if (res.status === 201) {
+        onSubmitProps.resetForm();
+        window.location.reload();
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+  };
+
   return (
-    <div className="border-4 rounded-md p-4 mb-4">
+    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md">
+      {isLoading && <p>Loading...</p>}
       {data && (
         <div>
           <div className="flex items-center justify-between">
@@ -44,7 +142,73 @@ const Post = ({ authorId, text, picture }: Props) => {
             />
           </div>
           <p className="my-2">{text}</p>
-          <img className="rounded-md" src={picture} alt={text} />
+          <img
+            onClick={() => !likeRequestInProgress && addLike()}
+            className="cursor-pointer rounded-md"
+            src={picture}
+            alt={text}
+          />
+          <div className="flex mt-2 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <FontAwesomeIcon
+                onClick={() => !likeRequestInProgress && addLike()}
+                className={`cursor-pointer ${liked && "text-sky-500"}`}
+                icon={faHeart}
+              />
+              <span>{likesCount}</span>
+            </div>
+          </div>
+          {comments.length ? (
+            <p
+              onClick={() => setShowComments((prev) => !prev)}
+              className="cursor-pointer"
+            >
+              {comments.length === 1
+                ? "View 1 Comment"
+                : `View all ${comments.length} comments`}
+            </p>
+          ) : (
+            <p>No Comments</p>
+          )}
+          {showComments &&
+            comments.map((comment: CommentData, index: number) => {
+              const commentUser = commentUsers[index];
+              return (
+                <div className="flex items-center gap-4 my-1" key={index}>
+                  <div className="w-12 h-12 relative">
+                    <Image
+                      className="rounded-full"
+                      fill={true}
+                      src={commentUser.picturePath}
+                      alt="pro pic"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold">
+                      {commentUser.firstName + " " + commentUser.lastName}
+                    </p>
+                    <p>{comment.text}</p>
+                  </div>
+                </div>
+              );
+            })}
+          <Formik
+            onSubmit={handleSubmit}
+            initialValues={initialValues}
+            validationSchema={schema}
+          >
+            {({ values, setFieldValue }) => (
+              <Form className="w-full">
+                <Field
+                  name="text"
+                  placeholder="Add a comment..."
+                  type="text"
+                  className="w-full p-1 rounded mt-3"
+                />
+                <button type="submit" style={{ display: "none" }}></button>
+              </Form>
+            )}
+          </Formik>
         </div>
       )}
     </div>

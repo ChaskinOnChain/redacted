@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import * as yup from "yup";
 import { Form, Formik } from "formik";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import FormField from "@/app/LoginComponents/FormField";
 import ImageUploadButton from "@/app/LoginComponents/ImageUploadButton";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faImage } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   email: string;
@@ -25,6 +27,7 @@ const initialValues = {
 };
 
 function PublishPost({ email }: Props) {
+  const [showImage, setShowImage] = useState(false);
   const { isLoading, isError, data } = useQuery({
     queryKey: ["user", email],
     queryFn: () => email && getUserByEmail(email),
@@ -51,7 +54,7 @@ function PublishPost({ email }: Props) {
   };
 
   return (
-    <div className="border-4 p-4 w-[400px] rounded-md">
+    <div className="border-4 p-4 w-[400px] rounded-md shadow-md">
       {isLoading && <p> Loading...</p>}
       {data && (
         <div className="flex items-center">
@@ -77,10 +80,18 @@ function PublishPost({ email }: Props) {
                     placeholder="What's on your mind..."
                   />
                 </div>
+                {showImage && <ImageUploadButton />}
                 <div className="h-[1px] w-full bg-slate-300/50 my-4"></div>
                 <div className="flex items-center justify-between w-full">
-                  <ImageUploadButton />
-                  <button className="bg-sky-500 text-white px-4 py-2 rounded">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => setShowImage((prev) => !prev)}
+                  >
+                    <FontAwesomeIcon className="mr-1" icon={faImage} />
+                    Image
+                  </div>
+
+                  <button className="bg-sky-500 text-white px-4 py-1 rounded-2xl text-sm">
                     POST
                   </button>
                 </div>

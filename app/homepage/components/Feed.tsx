@@ -21,6 +21,9 @@ function Feed({ email }: Props) {
           return (
             <Post
               key={post._id}
+              id={post._id}
+              likes={post.likes}
+              comments={post.comments}
               authorId={post.author}
               text={post.text}
               picture={post.picture}

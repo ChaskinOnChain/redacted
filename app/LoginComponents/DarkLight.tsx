@@ -23,8 +23,8 @@ function DarkLight() {
       <FontAwesomeIcon icon={faSun} />
       <FontAwesomeIcon icon={faMoon} />
       <motion.div
-        className="absolute rounded-full h-6 w-6 top-[2px] left-[5px] bg-sky-400"
-        animate={{ x: isDark ? "110%" : "4%" }}
+        className="absolute rounded-full h-5 w-5 top-[2px] left-[5px] bg-sky-400"
+        animate={{ x: isDark ? "115%" : "4%" }}
       ></motion.div>
     </div>
   );
