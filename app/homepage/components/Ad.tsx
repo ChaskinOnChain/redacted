@@ -3,7 +3,7 @@ import React from "react";
 
 function Ad() {
   return (
-    <div className="p-4 border-4 rounded-md shadow-md w-[450px]">
+    <div className="p-4 border-4 rounded-md shadow-md xl:w-[450px]">
       <div className="flex justify-between items-center">
         <h2 className="font-bold">Sponsered</h2>
         <h4 className="text-sm">Create Ad</h4>

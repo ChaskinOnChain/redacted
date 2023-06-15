@@ -1,5 +1,5 @@
 import { getUserByEmail } from "@/utils/api/apiUtils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as yup from "yup";
 import { Field, Form, Formik } from "formik";
 import Image from "next/image";
@@ -27,6 +27,7 @@ const initialValues = {
 };
 
 function PublishPost({ email }: Props) {
+  const queryClient = useQueryClient();
   const [showImage, setShowImage] = useState(false);
   const { isLoading, isError, data } = useQuery({
     queryKey: ["user", email],
@@ -39,7 +40,7 @@ function PublishPost({ email }: Props) {
       const res = await axios.post("/api/posts", values);
       if (res.status === 201) {
         onSubmitProps.resetForm();
-        window.location.reload();
+        queryClient.invalidateQueries(["posts"]);
       }
     } catch (error) {
       console.log(error);
@@ -54,7 +55,7 @@ function PublishPost({ email }: Props) {
   };
 
   return (
-    <div className="border-4 p-4 w-[550px] rounded-md shadow-md">
+    <div className="border-4 p-4 sm:min-w-[550px] rounded-md shadow-md">
       {isLoading && <p> Loading...</p>}
       {data && (
         <Formik

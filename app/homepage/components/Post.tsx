@@ -38,6 +38,12 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
   const session = useSession();
   const email = session.data?.user?.email;
 
+  const { data: returnedUser } = useQuery({
+    queryKey: ["users", email],
+    queryFn: () => email && getUserByEmail(email),
+    enabled: !!email,
+  });
+
   const initialValues = {
     text: "",
     commenterEmail: email,
@@ -53,14 +59,9 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     },
     enabled: comments.length > 0,
   });
-  const { data: returnedUser } = useQuery({
-    queryKey: ["LoggedInUser", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
-  });
 
   const { isLoading, isError, data } = useQuery({
-    queryKey: ["users", "id", authorId],
+    queryKey: ["users", authorId],
     queryFn: () => authorId && getUserById(authorId),
     enabled: !!authorId,
   });
@@ -113,7 +114,6 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["users"]);
-        queryClient.invalidateQueries(["LoggedInUser", email]);
       },
     }
   );
@@ -124,7 +124,6 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["users"]);
-        queryClient.invalidateQueries(["LoggedInUser", email]);
       },
     }
   );
@@ -158,7 +157,7 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
   ]);
 
   return (
-    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md max-w-[550px]">
+    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md xl:max-w-[550px] w-full">
       {isLoading && <p>Loading...</p>}
       {data && (
         <div>

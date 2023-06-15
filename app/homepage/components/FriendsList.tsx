@@ -10,13 +10,13 @@ interface Props {
 
 const FriendsList = ({ email }: Props) => {
   const { data, isLoading } = useQuery({
-    queryKey: ["LoggedInUser", email],
+    queryKey: ["users", email],
     queryFn: () => email && getUserByEmail(email),
     enabled: !!email,
   });
 
   const { data: usersFriends, isLoading: isUsersFriendsLoading } = useQuery({
-    queryKey: ["LoggedInUser", data?.friends],
+    queryKey: ["users", data?.friends],
     queryFn: async () => {
       const userFriendsPromises = data?.friends.map((friendId: string) =>
         getUserById(friendId)
@@ -32,8 +32,7 @@ const FriendsList = ({ email }: Props) => {
       axios.delete(`/api/users/${userId}/friends?friendId=${friendId}`),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["LoggedInUser"]);
-        queryClient.invalidateQueries([data?.friends]);
+        queryClient.invalidateQueries(["users"]);
       },
     }
   );

@@ -22,7 +22,9 @@ function page() {
 
   if (session.status === "authenticated") {
     return (
-      <div className={`min-h-screen flex justify-center gap-6 px-12 py-6`}>
+      <div
+        className={`min-h-screen xl:flex-row flex-col flex justify-center gap-6 px-12 py-6`}
+      >
         <ProfileSection email={email} />
         <MiddleSection email={email} />
         <RightHomePage email={email} />
