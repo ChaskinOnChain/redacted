@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import ProfileSection from "./components/ProfileSection";
 import MiddleSection from "./components/MiddleSection";
+import RightHomePage from "./components/RightHomePage";
 
 function page() {
   const router = useRouter();
@@ -21,10 +22,10 @@ function page() {
 
   if (session.status === "authenticated") {
     return (
-      <div className={`min-h-screen flex gap-6 px-12 py-6`}>
+      <div className={`min-h-screen flex justify-center gap-6 px-12 py-6`}>
         <ProfileSection email={email} />
         <MiddleSection email={email} />
-        <div></div>
+        <RightHomePage email={email} />
       </div>
     );
   }

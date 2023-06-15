@@ -1,9 +1,13 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserPlus, faHeart } from "@fortawesome/free-solid-svg-icons";
+import {
+  faUserPlus,
+  faHeart,
+  faUserMinus,
+} from "@fortawesome/free-solid-svg-icons";
 import { getUserByEmail, getUserById } from "@/utils/api/apiUtils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { Formik, Form, Field } from "formik";
@@ -39,18 +43,16 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     commenterEmail: email,
   };
 
-  const { data: commentUsers, isLoading: isLoadingCommentUsers } = useQuery(
-    ["commentUsers", comments],
-    async () => {
+  const { data: commentUsers, isLoading: isLoadingCommentUsers } = useQuery({
+    queryKey: ["commentUsers", comments],
+    queryFn: async () => {
       const userPromises = comments.map((comment: CommentData) =>
         getUserByEmail(comment.email)
       );
       return Promise.all(userPromises);
     },
-    {
-      enabled: comments.length > 0,
-    }
-  );
+    enabled: comments.length > 0,
+  });
   const { data: returnedUser } = useQuery({
     queryKey: ["LoggedInUser", email],
     queryFn: () => email && getUserByEmail(email),
@@ -58,26 +60,14 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
   });
 
   const { isLoading, isError, data } = useQuery({
-    queryKey: ["user", authorId],
+    queryKey: ["users", "id", authorId],
     queryFn: () => authorId && getUserById(authorId),
     enabled: !!authorId,
   });
 
   const [likesCount, setLikesCount] = useState(likes.length);
   const [liked, setLiked] = useState(false);
-
-  useEffect(() => {
-    if (returnedUser) {
-      if (likes.includes(returnedUser._id)) {
-        setLiked(true);
-        if (likesCount === 0) {
-          setLikesCount(1);
-        }
-      } else {
-        setLiked(false);
-      }
-    }
-  }, [returnedUser, likes]);
+  const [isFriends, setIsFriends] = useState(false);
 
   async function addLike() {
     setLikeRequestInProgress(true);
@@ -114,8 +104,61 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     }
   };
 
+  const queryClient = useQueryClient();
+  const addfriendMutation = useMutation(
+    ({ userId, authorId }) =>
+      axios.post(`/api/users/${userId}/friends`, {
+        friendId: authorId,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["users"]);
+        queryClient.invalidateQueries(["LoggedInUser", email]);
+      },
+    }
+  );
+
+  const deleteFriendMutation = useMutation(
+    ({ userId, authorId }) =>
+      axios.delete(`/api/users/${userId}/friends?friendId=${authorId}`),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["users"]);
+        queryClient.invalidateQueries(["LoggedInUser", email]);
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (returnedUser) {
+      if (likes.includes(returnedUser._id)) {
+        setLiked(true);
+        if (likesCount === 0) {
+          setLikesCount(1);
+        }
+      } else {
+        setLiked(false);
+      }
+    }
+  }, [returnedUser, authorId]);
+
+  useEffect(() => {
+    if (returnedUser) {
+      if (returnedUser.friends.includes(authorId)) {
+        setIsFriends(true);
+      } else {
+        setIsFriends(false);
+      }
+    }
+  }, [
+    returnedUser,
+    authorId,
+    addfriendMutation.isSuccess,
+    deleteFriendMutation.isSuccess,
+  ]);
+
   return (
-    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md">
+    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md max-w-[550px]">
       {isLoading && <p>Loading...</p>}
       {data && (
         <div>
@@ -129,6 +172,7 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
                   alt="pro pic"
                 />
               </div>
+
               <div>
                 <p className="font-bold">
                   {data.firstName + " " + data.lastName}
@@ -137,17 +181,34 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
               </div>
             </div>
             <FontAwesomeIcon
-              className="border-4 p-2 rounded-full cursor-pointer"
-              icon={faUserPlus}
+              onClick={() =>
+                isFriends
+                  ? deleteFriendMutation.mutate({
+                      userId: returnedUser._id,
+                      authorId,
+                    })
+                  : addfriendMutation.mutate({
+                      userId: returnedUser._id,
+                      authorId,
+                    })
+              }
+              className={`border-4 p-2 rounded-full cursor-pointer ${
+                isFriends
+                  ? "text-red-400 border-red-400"
+                  : "text-blue-400 border-blue-400"
+              } hover:shadow`}
+              icon={isFriends ? faUserMinus : faUserPlus}
             />
           </div>
           <p className="my-2">{text}</p>
-          <img
-            onClick={() => !likeRequestInProgress && addLike()}
-            className="cursor-pointer rounded-md"
-            src={picture}
-            alt={text}
-          />
+          {picture && (
+            <img
+              onClick={() => !likeRequestInProgress && addLike()}
+              className="cursor-pointer rounded-md"
+              src={picture}
+              alt={text}
+            />
+          )}
           <div className="flex mt-2 text-sm">
             <div className="flex items-center gap-2 mb-2">
               <FontAwesomeIcon

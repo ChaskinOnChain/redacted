@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot, faSuitcase } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 interface Props {
   email: string;
@@ -15,6 +16,11 @@ function Profile({ email }: Props) {
     queryFn: () => email && getUserByEmail(email),
     enabled: !!email,
   });
+
+  // console.log(data);
+  // const session = useSession();
+  // console.log(session);
+
   return (
     <>
       {isLoading && <p> Loading...</p>}

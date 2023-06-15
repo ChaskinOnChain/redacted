@@ -22,7 +22,7 @@ function Logout() {
     <>
       <div
         onClick={() => setLogout((prev) => !prev)}
-        className=" p-2 border-4 shadow-sm rounded flex justify-between items-center gap-2 cursor-pointer relative"
+        className="p-2 border-4 shadow-sm rounded flex justify-between items-center gap-2 cursor-pointer relative "
       >
         {userQuery.isLoading ? (
           <p>Loading...</p>

@@ -56,23 +56,26 @@ const authOptions: NextAuthOptions = NextAuth({
       if (account?.provider === "google" || account?.provider === "facebook") {
         await connectDb();
 
-        // The profile object contains the user's information
-        const { email, name, image } = profile;
+        const { email, given_name, family_name, picture } = profile;
+        console.log(profile);
 
         let dbUser = await User.findOne({ email });
-        const firstName = name.split(" ")[0];
-        const lastName = name.split(" ").slice(-1)[0];
+
         if (!dbUser) {
-          dbUser = new User({ email, firstName, lastName, picturePath: image });
+          dbUser = new User({
+            email,
+            firstName: given_name,
+            lastName: family_name,
+            picturePath: picture,
+            occupation: "",
+            location: "",
+            viewedProfile: Math.floor(Math.random() * 10000),
+            impressions: Math.floor(Math.random() * 10000),
+          });
           await dbUser.save();
         }
-
-        // You can choose to return a boolean or an object
-        // Returning an object will merge the returned object with the current user object
         return dbUser;
       }
-
-      // If the callback returns false or nothing, the sign in will be denied
       return true;
     },
   },
