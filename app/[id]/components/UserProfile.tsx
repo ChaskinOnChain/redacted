@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { getUserById } from "@/utils/api/apiUtils";
+import React, { useEffect, useState } from "react";
+import { getUserByEmail, getUserById } from "@/utils/api/apiUtils";
 import { useQuery } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,6 +15,7 @@ import * as yup from "yup";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const schemaOccupation = yup.object().shape({
   occupation: yup.string().required("required"),
@@ -35,6 +36,10 @@ const UserProfile = ({ id }: Props) => {
   const queryClient = useQueryClient();
   const [isEdittingLocation, setIsEdittingLocation] = useState(false);
   const [isEdittingOccupation, setIsEdittingOccupation] = useState(false);
+  const session = useSession();
+  const email = session.data?.user?.email;
+  const [usersPage, setUsersPage] = useState(false);
+
   const { isLoading, data } = useQuery({
     queryKey: ["user", id],
     queryFn: () => id && getUserById(id),
@@ -82,6 +87,17 @@ const UserProfile = ({ id }: Props) => {
       throw new Error(error.message);
     }
   };
+
+  const { data: userData } = useQuery({
+    queryKey: ["user", email],
+    queryFn: () => getUserByEmail(email),
+  });
+
+  useEffect(() => {
+    if (userData && userData._id === id) {
+      setUsersPage(true);
+    }
+  }, [userData, id]);
 
   return (
     <>
@@ -146,11 +162,13 @@ const UserProfile = ({ id }: Props) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <FontAwesomeIcon
-                onClick={() => setIsEdittingLocation((prev) => !prev)}
-                className="cursor-pointer"
-                icon={faEdit}
-              />
+              {usersPage && (
+                <FontAwesomeIcon
+                  onClick={() => setIsEdittingLocation((prev) => !prev)}
+                  className="cursor-pointer"
+                  icon={faEdit}
+                />
+              )}
             </div>
           </div>
           <div className="flex item-center justify-between">
@@ -185,11 +203,13 @@ const UserProfile = ({ id }: Props) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <FontAwesomeIcon
-                onClick={() => setIsEdittingOccupation((prev) => !prev)}
-                className="cursor-pointer"
-                icon={faEdit}
-              />
+              {usersPage && (
+                <FontAwesomeIcon
+                  onClick={() => setIsEdittingOccupation((prev) => !prev)}
+                  className="cursor-pointer"
+                  icon={faEdit}
+                />
+              )}
             </div>
           </div>
           <div className="h-[1px] w-full bg-slate-300/50 my-4"></div>
