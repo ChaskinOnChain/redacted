@@ -3,12 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import Post from "./Post";
 
-type Props = {
-  email: string;
-};
-
-function Feed({ email }: Props) {
-  const { isLoading, isError, data } = useQuery({
+function Feed() {
+  const { isLoading, data } = useQuery({
     queryKey: ["posts"],
     queryFn: () => getPosts(),
   });

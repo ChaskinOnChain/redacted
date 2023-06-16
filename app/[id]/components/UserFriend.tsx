@@ -11,9 +11,10 @@ type Props = {
   userId: string;
   friendId: string;
   removeFriend: (params: { userId: string; friendId: string }) => void;
+  usersPage: boolean;
 };
 
-const Friend = ({
+const UserFriend = ({
   img,
   firstName,
   lastName,
@@ -21,6 +22,7 @@ const Friend = ({
   userId,
   friendId,
   removeFriend,
+  usersPage,
 }: Props) => {
   return (
     <div className="flex items-center justify-between my-4">
@@ -33,13 +35,15 @@ const Friend = ({
           <p>{occupation}</p>
         </div>
       </div>
-      <FontAwesomeIcon
-        onClick={() => removeFriend({ userId, friendId })}
-        className="border-4 p-2 rounded-full cursor-pointer text-red-400 border-red-400 hover:shadow"
-        icon={faUserMinus}
-      />
+      {usersPage && (
+        <FontAwesomeIcon
+          onClick={() => removeFriend({ userId, friendId })}
+          className="border-4 p-2 rounded-full cursor-pointer text-red-400 border-red-400 hover:shadow"
+          icon={faUserMinus}
+        />
+      )}
     </div>
   );
 };
 
-export default Friend;
+export default UserFriend;

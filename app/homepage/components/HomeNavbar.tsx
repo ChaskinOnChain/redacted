@@ -7,16 +7,15 @@ import {
   faQuestionCircle,
   faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
-import Logo from "./Logo";
 import Logout from "./Logout";
+import NavLogo from "./NavLogo";
 
 function HomeNavbar() {
   return (
     <>
       <nav className="w-full h-16 flex justify-between items-center px-12 max-w-[1466px] mx-auto">
-        <div className=" flex items-center justify-between gap-3 relative">
-          <Logo />
-          <span className="font-bold text-xl text-sky-400">Redacted</span>
+        <div className="relative flex items-center justify-between gap-3">
+          <NavLogo />
           <div>
             <input
               className="bg-slate-200 rounded px-4 py-1 text-base"

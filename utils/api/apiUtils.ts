@@ -15,3 +15,9 @@ export function getUserById(id: string) {
 export function getPosts() {
   return axios.get(`http://localhost:3000/api/posts/`).then((res) => res.data);
 }
+
+export function getUserPosts(id: string) {
+  return axios
+    .get(`http://localhost:3000/api/users/${id}/posts`)
+    .then((res) => res.data);
+}

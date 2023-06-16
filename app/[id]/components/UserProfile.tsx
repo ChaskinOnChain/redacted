@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useState } from "react";
-import { getUserByEmail } from "@/utils/api/apiUtils";
+import { getUserById } from "@/utils/api/apiUtils";
 import { useQuery } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,10 +16,6 @@ import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-interface Props {
-  email: string;
-}
-
 const schemaOccupation = yup.object().shape({
   occupation: yup.string().required("required"),
   userId: yup.string().required("required"),
@@ -28,15 +26,19 @@ const schemaLocation = yup.object().shape({
   userId: yup.string().required("required"),
 });
 
-function Profile({ email }: Props) {
+type Props = {
+  id: string;
+};
+
+const UserProfile = ({ id }: Props) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isEdittingLocation, setIsEdittingLocation] = useState(false);
   const [isEdittingOccupation, setIsEdittingOccupation] = useState(false);
   const { isLoading, data } = useQuery({
-    queryKey: ["user", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
+    queryKey: ["user", id],
+    queryFn: () => id && getUserById(id),
+    enabled: !!id,
   });
 
   const initialValuesOccupation = {
@@ -85,7 +87,9 @@ function Profile({ email }: Props) {
     <>
       {isLoading && <p> Loading...</p>}
       {data && (
-        <>
+        <div
+          className={`shadow-md min-w-[20rem] h-72 p-4 rounded-md border-4 flex flex-col justify-between`}
+        >
           <div className="flex gap-3">
             <div className="h-16 w-16 relative cursor-pointer">
               <Image
@@ -197,10 +201,10 @@ function Profile({ email }: Props) {
             <p>Impressions of your post</p>
             <p className="font-bold">{data.impressions}</p>
           </div>
-        </>
+        </div>
       )}
     </>
   );
-}
+};
 
-export default Profile;
+export default UserProfile;

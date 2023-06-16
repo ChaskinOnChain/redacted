@@ -1,18 +1,30 @@
+"use client";
+
 import { getUserByEmail, getUserById } from "@/utils/api/apiUtils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React from "react";
-import Friend from "./Friend";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useSession } from "next-auth/react";
+import UserFriend from "./UserFriend";
 
 interface Props {
-  email: string;
+  id: string;
 }
 
-const FriendsList = ({ email }: Props) => {
+const UserFriendsList = ({ id }: Props) => {
+  const session = useSession();
+  const email = session.data?.user?.email;
+  const [usersPage, setUsersPage] = useState(false);
+
+  const { data: userData } = useQuery({
+    queryKey: ["user", email],
+    queryFn: () => getUserByEmail(email),
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["users", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
+    queryKey: ["user", id],
+    queryFn: () => id && getUserById(id),
+    enabled: !!id,
   });
 
   const { data: usersFriends, isLoading: isUsersFriendsLoading } = useQuery({
@@ -37,17 +49,23 @@ const FriendsList = ({ email }: Props) => {
     }
   );
 
+  useEffect(() => {
+    if (userData && userData._id === id) {
+      setUsersPage(true);
+    }
+  }, [userData, id]);
+
   return (
     <div className="mt-4 border-4 shadow-md rounded-md p-4">
       <h4 className="font-bold">Friends List</h4>
       <div>
         {isLoading || (isUsersFriendsLoading && data?.friends.length > 0) ? (
           <p>Loading...</p>
-        ) : data?.friends.length > 0 ? (
+        ) : data?.friends && data?.friends.length > 0 ? (
           data.friends.map((friendId, index) => {
             const friend = usersFriends[index];
             return (
-              <Friend
+              <UserFriend
                 userId={data._id}
                 friendId={friendId}
                 key={index}
@@ -56,15 +74,16 @@ const FriendsList = ({ email }: Props) => {
                 lastName={friend?.lastName}
                 occupation={friend?.occupation}
                 removeFriend={removeFriendMutation.mutate}
+                usersPage={usersPage}
               />
             );
           })
         ) : (
-          <p>No friends :(</p>
+          <p>No Friends :(</p>
         )}
       </div>
     </div>
   );
 };
 
-export default FriendsList;
+export default UserFriendsList;

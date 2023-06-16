@@ -12,7 +12,7 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
-import { useRouter } from "next/navigation";
+import Delete from "./Delete";
 
 type Props = {
   authorId: string;
@@ -21,6 +21,7 @@ type Props = {
   comments: [{ text: string; email: string }];
   likes: [string];
   id: string;
+  usersPage: boolean;
 };
 
 type CommentData = {
@@ -33,8 +34,15 @@ const schema = yup.object().shape({
   commenterEmail: yup.string().required("required"),
 });
 
-const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
-  const router = useRouter();
+const UserPost = ({
+  authorId,
+  text,
+  picture,
+  comments,
+  likes,
+  id,
+  usersPage,
+}: Props) => {
   const [likeRequestInProgress, setLikeRequestInProgress] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const session = useSession();
@@ -70,7 +78,6 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
 
   const [likesCount, setLikesCount] = useState(likes.length);
   const [liked, setLiked] = useState(false);
-  const [isFriends, setIsFriends] = useState(false);
 
   async function addLike() {
     setLikeRequestInProgress(true);
@@ -107,29 +114,6 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     }
   };
 
-  const queryClient = useQueryClient();
-  const addfriendMutation = useMutation(
-    ({ userId, authorId }) =>
-      axios.post(`/api/users/${userId}/friends`, {
-        friendId: authorId,
-      }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["users"]);
-      },
-    }
-  );
-
-  const deleteFriendMutation = useMutation(
-    ({ userId, authorId }) =>
-      axios.delete(`/api/users/${userId}/friends?friendId=${authorId}`),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["users"]);
-      },
-    }
-  );
-
   useEffect(() => {
     if (returnedUser) {
       if (likes.includes(returnedUser._id)) {
@@ -143,32 +127,14 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
     }
   }, [returnedUser, authorId]);
 
-  useEffect(() => {
-    if (returnedUser) {
-      if (returnedUser.friends.includes(authorId)) {
-        setIsFriends(true);
-      } else {
-        setIsFriends(false);
-      }
-    }
-  }, [
-    returnedUser,
-    authorId,
-    addfriendMutation.isSuccess,
-    deleteFriendMutation.isSuccess,
-  ]);
-
   return (
-    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md xl:max-w-[550px] w-full">
+    <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md xl:max-w-[550px] w-full relative">
       {isLoading && <p>Loading...</p>}
       {data && (
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div
-                onClick={() => router.push(`/${authorId}`)}
-                className="w-12 h-12 cursor-pointer relative"
-              >
+              <div className="w-12 h-12 relative">
                 <Image
                   className="rounded-full"
                   fill={true}
@@ -178,35 +144,14 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
               </div>
 
               <div>
-                <p
-                  onClick={() => router.push(`/${authorId}`)}
-                  className="font-bold cursor-pointer"
-                >
+                <p className="font-bold">
                   {data.firstName + " " + data.lastName}
                 </p>
                 <p>{data.location}</p>
               </div>
             </div>
-            <FontAwesomeIcon
-              onClick={() =>
-                isFriends
-                  ? deleteFriendMutation.mutate({
-                      userId: returnedUser._id,
-                      authorId,
-                    })
-                  : addfriendMutation.mutate({
-                      userId: returnedUser._id,
-                      authorId,
-                    })
-              }
-              className={`border-4 p-2 rounded-full cursor-pointer ${
-                isFriends
-                  ? "text-red-400 border-red-400"
-                  : "text-blue-400 border-blue-400"
-              } hover:shadow`}
-              icon={isFriends ? faUserMinus : faUserPlus}
-            />
           </div>
+          {usersPage && <Delete id={id} />}
           <p className="my-2">{text}</p>
           {picture && (
             <img
@@ -283,4 +228,4 @@ const Post = ({ authorId, text, picture, comments, likes, id }: Props) => {
   );
 };
 
-export default Post;
+export default UserPost;
