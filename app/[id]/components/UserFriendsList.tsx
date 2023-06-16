@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import UserFriend from "./UserFriend";
+import { useGetUserByEmail, useGetUserById } from "@/app/hooks/queryHooks";
 
 interface Props {
   id: string;
@@ -15,17 +16,8 @@ const UserFriendsList = ({ id }: Props) => {
   const session = useSession();
   const email = session.data?.user?.email;
   const [usersPage, setUsersPage] = useState(false);
-
-  const { data: userData } = useQuery({
-    queryKey: ["user", email],
-    queryFn: () => getUserByEmail(email),
-  });
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["user", id],
-    queryFn: () => id && getUserById(id),
-    enabled: !!id,
-  });
+  const { data: userData } = useGetUserByEmail(email || "");
+  const { data, isLoading } = useGetUserById(id);
 
   const { data: usersFriends, isLoading: isUsersFriendsLoading } = useQuery({
     queryKey: ["users", data?.friends],
@@ -54,6 +46,10 @@ const UserFriendsList = ({ id }: Props) => {
       setUsersPage(true);
     }
   }, [userData, id]);
+
+  if (!email) {
+    return null;
+  }
 
   return (
     <div className="mt-4 border-4 shadow-md rounded-md p-4">

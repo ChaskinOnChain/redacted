@@ -34,6 +34,27 @@ export const POST = async (req: NextRequest) => {
 
 export const GET = async (req: NextRequest) => {
   await connectDb();
-  const posts = await Post.find().sort({ createdAt: -1 });
-  return NextResponse.json(posts, { status: 201 });
+
+  const search = req.nextUrl.searchParams.get("search") || "";
+  const page = parseInt(req.nextUrl.searchParams.get("page") || "1");
+  const limit = parseInt(req.nextUrl.searchParams.get("limit") || "10");
+  const skip = (page - 1) * limit;
+
+  let query = {};
+  if (search) {
+    query = {
+      text: { $regex: new RegExp(search, "i") },
+    };
+  }
+
+  const totalPosts = await Post.countDocuments(query);
+  const posts = await Post.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const lastPage = Math.ceil(totalPosts / limit);
+  const reachedLastPage = page >= lastPage;
+
+  return NextResponse.json({ posts, reachedLastPage }, { status: 201 });
 };

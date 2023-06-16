@@ -1,14 +1,13 @@
-import { getUserByEmail } from "@/utils/api/apiUtils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import * as yup from "yup";
 import { Field, Form, Formik } from "formik";
 import Image from "next/image";
 import React, { useState } from "react";
-import FormField from "@/app/LoginComponents/FormField";
 import ImageUploadButton from "@/app/LoginComponents/ImageUploadButton";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
+import { useGetUserByEmail } from "@/app/hooks/queryHooks";
 
 interface Props {
   email: string;
@@ -29,11 +28,7 @@ const initialValues = {
 function PublishPost({ email }: Props) {
   const queryClient = useQueryClient();
   const [showImage, setShowImage] = useState(false);
-  const { isLoading, isError, data } = useQuery({
-    queryKey: ["user", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
-  });
+  const { isLoading, data } = useGetUserByEmail(email);
 
   const handleSubmit = async (values, onSubmitProps) => {
     try {

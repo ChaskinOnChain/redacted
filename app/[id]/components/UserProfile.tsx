@@ -16,6 +16,7 @@ import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useGetUserByEmail, useGetUserById } from "@/app/hooks/queryHooks";
 
 const schemaOccupation = yup.object().shape({
   occupation: yup.string().required("required"),
@@ -39,12 +40,8 @@ const UserProfile = ({ id }: Props) => {
   const session = useSession();
   const email = session.data?.user?.email;
   const [usersPage, setUsersPage] = useState(false);
-
-  const { isLoading, data } = useQuery({
-    queryKey: ["user", id],
-    queryFn: () => id && getUserById(id),
-    enabled: !!id,
-  });
+  const { isLoading, data } = useGetUserById(id);
+  const { data: userData } = useGetUserByEmail(email || "");
 
   const initialValuesOccupation = {
     occupation: "",
@@ -88,16 +85,15 @@ const UserProfile = ({ id }: Props) => {
     }
   };
 
-  const { data: userData } = useQuery({
-    queryKey: ["user", email],
-    queryFn: () => getUserByEmail(email),
-  });
-
   useEffect(() => {
     if (userData && userData._id === id) {
       setUsersPage(true);
     }
   }, [userData, id]);
+
+  if (!email) {
+    return null;
+  }
 
   return (
     <>

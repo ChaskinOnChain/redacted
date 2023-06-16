@@ -3,17 +3,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import Friend from "./Friend";
 import axios from "axios";
+import { useGetUserByEmail } from "@/app/hooks/queryHooks";
 
 interface Props {
   email: string;
 }
 
 const FriendsList = ({ email }: Props) => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["users", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
-  });
+  const { data, isLoading } = useGetUserByEmail(email);
 
   const { data: usersFriends, isLoading: isUsersFriendsLoading } = useQuery({
     queryKey: ["users", data?.friends],

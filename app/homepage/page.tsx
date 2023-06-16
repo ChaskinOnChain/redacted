@@ -6,12 +6,13 @@ import React from "react";
 import ProfileSection from "./components/ProfileSection";
 import MiddleSection from "./components/MiddleSection";
 import RightHomePage from "./components/RightHomePage";
+import LoadingSpinner from "./loading";
 
 function page() {
   const router = useRouter();
   const session = useSession();
   if (session.status === "loading") {
-    return <p>Loading...</p>;
+    return <LoadingSpinner />;
   }
 
   if (session.status === "unauthenticated") {

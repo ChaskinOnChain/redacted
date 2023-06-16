@@ -13,6 +13,7 @@ import * as yup from "yup";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useGetUserByEmail } from "@/app/hooks/queryHooks";
 
 interface Props {
   email: string;
@@ -33,11 +34,7 @@ function Profile({ email }: Props) {
   const queryClient = useQueryClient();
   const [isEdittingLocation, setIsEdittingLocation] = useState(false);
   const [isEdittingOccupation, setIsEdittingOccupation] = useState(false);
-  const { isLoading, data } = useQuery({
-    queryKey: ["user", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
-  });
+  const { isLoading, data } = useGetUserByEmail(email);
 
   const initialValuesOccupation = {
     occupation: "",

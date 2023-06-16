@@ -12,12 +12,16 @@ export function getUserById(id: string) {
     .then((res) => res.data);
 }
 
-export function getPosts() {
-  return axios.get(`http://localhost:3000/api/posts/`).then((res) => res.data);
+export function getPosts({ pageParam = 1 }) {
+  return axios
+    .get(`http://localhost:3000/api/posts?page=${pageParam}&limit=3`)
+    .then((res) => res.data);
 }
 
-export function getUserPosts(id: string) {
+export function getUserPosts(id: string, { pageParam = 1 }) {
   return axios
-    .get(`http://localhost:3000/api/users/${id}/posts`)
+    .get(
+      `http://localhost:3000/api/users/${id}/posts?page=${pageParam}&limit=3`
+    )
     .then((res) => res.data);
 }

@@ -13,6 +13,7 @@ import { useSession } from "next-auth/react";
 import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import Delete from "./Delete";
+import { useGetUserByEmail, useGetUserById } from "@/app/hooks/queryHooks";
 
 type Props = {
   authorId: string;
@@ -47,12 +48,11 @@ const UserPost = ({
   const [showComments, setShowComments] = useState(false);
   const session = useSession();
   const email = session.data?.user?.email;
+  const { isLoading, data } = useGetUserById(authorId);
+  const [likesCount, setLikesCount] = useState(likes.length);
+  const [liked, setLiked] = useState(false);
 
-  const { data: returnedUser } = useQuery({
-    queryKey: ["users", email],
-    queryFn: () => email && getUserByEmail(email),
-    enabled: !!email,
-  });
+  const { data: returnedUser } = useGetUserByEmail(email);
 
   const initialValues = {
     text: "",
@@ -69,15 +69,6 @@ const UserPost = ({
     },
     enabled: comments.length > 0,
   });
-
-  const { isLoading, data } = useQuery({
-    queryKey: ["users", authorId],
-    queryFn: () => authorId && getUserById(authorId),
-    enabled: !!authorId,
-  });
-
-  const [likesCount, setLikesCount] = useState(likes.length);
-  const [liked, setLiked] = useState(false);
 
   async function addLike() {
     setLikeRequestInProgress(true);
@@ -126,6 +117,10 @@ const UserPost = ({
       }
     }
   }, [returnedUser, authorId]);
+
+  if (!email) {
+    return null;
+  }
 
   return (
     <div className="border-4 rounded-md px-4 pt-4 pb-2 mb-4 shadow-md xl:max-w-[550px] w-full relative">
