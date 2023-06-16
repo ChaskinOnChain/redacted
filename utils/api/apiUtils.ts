@@ -12,9 +12,11 @@ export function getUserById(id: string) {
     .then((res) => res.data);
 }
 
-export function getPosts({ pageParam = 1 }) {
+export function getPosts({ pageParam = 1 }, search: string) {
   return axios
-    .get(`http://localhost:3000/api/posts?page=${pageParam}&limit=3`)
+    .get(
+      `http://localhost:3000/api/posts?page=${pageParam}&limit=3&search=${search}`
+    )
     .then((res) => res.data);
 }
 

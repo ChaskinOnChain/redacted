@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { SearchProvider } from "./SearchContext/SearchContext";
 import HomeNavbar from "./components/HomeNavbar";
 
 export default function DashboardLayout({
@@ -8,8 +8,10 @@ export default function DashboardLayout({
 }) {
   return (
     <section>
-      <HomeNavbar />
-      {children}
+      <SearchProvider>
+        <HomeNavbar />
+        {children}
+      </SearchProvider>
     </section>
   );
 }
