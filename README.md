@@ -10,10 +10,6 @@ This project is a social networking platform powered by Next.js. It aims to prov
 - **Profile Creation**: Each user can create a personalized profile.
 - **Search**: The platform includes a search function for users to find posts.
 
-## Code Overview
-
-The main file, `page.js`, uses the `next-auth/react` package to manage user sessions. Depending on the session status, the user is either shown a loading spinner, redirected to the login page, or shown the main page.
-
 ## How To Use
 
 To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
